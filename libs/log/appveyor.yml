@@ -1,4 +1,4 @@
-# Copyright 2019 - 2021 Andrey Semashev
+# Copyright 2019 - 2022 Andrey Semashev
 # Distributed under the Boost Software License, Version 1.0.
 # (See accompanying file LICENSE_1_0.txt or copy at http://boost.org/LICENSE_1_0.txt)
 
@@ -37,8 +37,12 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - TOOLSET: msvc-14.2
       ADDRESS_MODEL: 64
-      CXXSTD: 14,17
+      CXXSTD: 14,17,20
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    - TOOLSET: msvc-14.3
+      ADDRESS_MODEL: 64
+      CXXSTD: 14,17,20
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     - TOOLSET: gcc
       ADDRESS_MODEL: 64
       CXXSTD: 03,11
@@ -83,7 +87,7 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - TOOLSET: msvc-14.2
       ADDRESS_MODEL: 32
-      CXXSTD: 14,17
+      CXXSTD: 14,17,20
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     - TOOLSET: gcc
       ADDRESS_MODEL: 32
