@@ -21,7 +21,7 @@ jobs:
 
           - lib: filesystem
             bopts: install
-            os: macos-10.15
+            os: macos-latest
 
           # --layout=versioned
 
@@ -31,7 +31,7 @@ jobs:
 
           - lib: filesystem
             bopts: --layout=versioned install
-            os: macos-10.15
+            os: macos-latest
 
           # --layout=tagged
 
@@ -41,7 +41,7 @@ jobs:
 
           - lib: filesystem
             bopts: --layout=tagged install
-            os: macos-10.15
+            os: macos-latest
 
           # build with clang++, use with g++
 
@@ -71,6 +71,28 @@ jobs:
           - lib: filesystem
             bopts: toolset=clang --layout=versioned install
             copts: -DBoost_COMPILER=-clang11
+            os: ubuntu-20.04
+
+          # build with gcc/clang, use with clang/gcc (w/ toolset list)
+
+          - lib: filesystem
+            bopts: toolset=gcc --layout=versioned install
+            copts: -DCMAKE_CXX_COMPILER=clang++ -DBoost_COMPILER="gcc9;clang11"
+            os: ubuntu-20.04
+
+          - lib: filesystem
+            bopts: toolset=clang --layout=versioned install
+            copts: -DBoost_COMPILER="gcc9;clang11"
+            os: ubuntu-20.04
+
+          - lib: filesystem
+            bopts: toolset=gcc --layout=versioned install
+            copts: -DCMAKE_CXX_COMPILER=clang++ -DBoost_COMPILER="-gcc9;-clang11"
+            os: ubuntu-20.04
+
+          - lib: filesystem
+            bopts: toolset=clang --layout=versioned install
+            copts: -DBoost_COMPILER="-gcc9;-clang11"
             os: ubuntu-20.04
 
           # shared
@@ -142,7 +164,7 @@ jobs:
           - lib: filesystem
             bopts: stage
             copts: -DUSE_STAGED_BOOST=ON
-            os: macos-10.15
+            os: macos-latest
 
           - lib: filesystem
             bopts: --stagedir=stage64-gcc5 stage
@@ -329,7 +351,7 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install packages
         if: matrix.install
@@ -450,11 +472,11 @@ jobs:
             os: windows-2022
 
           # clang-cl
-          #   b2 finds clang-13, but CMake uses the one supplied with VS2022, which is 12
+          #   b2 and CMake find and use a different clang-cl
 
           - lib: filesystem
             bopts: toolset=clang-win install
-            copts: "-G \"Visual Studio 17 2022\" -T clangcl -DBoost_COMPILER=clangw13"
+            copts: "-G \"Visual Studio 17 2022\" -T clangcl -DBoost_COMPILER=clangw14"
             os: windows-2022
 
           # other libraries
@@ -524,7 +546,7 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Boost
         shell: cmd

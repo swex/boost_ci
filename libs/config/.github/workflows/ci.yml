@@ -21,7 +21,7 @@ jobs:
       matrix:
         compiler: [ g++-11, g++-12, clang++-14 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1
@@ -65,7 +65,7 @@ jobs:
       matrix:
         compiler: [ clang++-11, clang++-12, clang++-13 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1
@@ -109,7 +109,7 @@ jobs:
       matrix:
         compiler: [ g++-9, g++-10, clang++-9, clang++-10 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1
@@ -146,27 +146,21 @@ jobs:
       - name: Test
         run: ../../../b2 toolset=$TOOLSET cxxstd=03,11,14,17,2a
         working-directory: ../boost-root/libs/config/test
-  ubuntu-bionic:
-    runs-on: ubuntu-18.04
+  macos_11:
+    runs-on: macos-11
     strategy:
       fail-fast: false
       matrix:
-        compiler: [ g++-7, g++-8, clang++-7, clang++-8 ]
+        toolset: [ clang, gcc-11, gcc-10, gcc-9 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1
         with:
-          commit-filter: '[skip ci];[ci skip];[CI SKIP];[SKIP CI];***CI SKIP***;***SKIP CI***;[windows];[Windows];[WINDOWS];[apple];[Apple];[APPLE]'
+          commit-filter: '[skip ci];[ci skip];[CI SKIP];[SKIP CI];***CI SKIP***;***SKIP CI***;[windows];[Windows];[WINDOWS];[linux];[Linux];[LINUX]'
           commit-filter-separator: ';'
           fail-fast: true
-      - name: Set TOOLSET
-        run: echo ${{ matrix.compiler }} | awk '/^g/ { print "TOOLSET=gcc" } /^clang/ { print "TOOLSET=clang" }' >> $GITHUB_ENV
-      - name: Add repository
-        run: sudo apt-add-repository -y "ppa:ubuntu-toolchain-r/test"
-      - name: Install packages
-        run: sudo apt install g++-7 g++-8 clang-7 clang-8
       - name: Checkout main boost
         run: git clone -b develop --depth 1 https://github.com/boostorg/boost.git ../boost-root
       - name: Update Dependencies
@@ -181,23 +175,20 @@ jobs:
       - name: Generate headers
         run: ./b2 headers
         working-directory: ../boost-root
-      - name: Generate user config
-        run: 'echo "using $TOOLSET : : ${{ matrix.compiler }} ;" > ~/user-config.jam'
-        working-directory: ../boost-root
-      - name: Config info install
-        run: ../../../b2 print_config_info toolset=$TOOLSET cxxstd=03,11,14,17
+      - name: Config info
+        run: ../../../b2 print_config_info toolset=${{ matrix.toolset }} cxxstd=03,11,14,17,2a
         working-directory: ../boost-root/libs/config/test
       - name: Test
-        run: ../../../b2 toolset=$TOOLSET cxxstd=03,11,14,17
+        run: ../../../b2 toolset=${{ matrix.toolset }} cxxstd=03,11,14,17,2a
         working-directory: ../boost-root/libs/config/test
-  macos:
-    runs-on: macos-latest
+  macos_12:
+    runs-on: macos-12
     strategy:
       fail-fast: false
       matrix:
         toolset: [ clang ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1
@@ -235,7 +226,7 @@ jobs:
       matrix:
         toolset: [ msvc-14.0 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1
@@ -273,7 +264,7 @@ jobs:
       matrix:
         toolset: [ msvc-14.2 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1
@@ -311,7 +302,7 @@ jobs:
       matrix:
         toolset: [ msvc-14.3 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1
@@ -349,7 +340,7 @@ jobs:
       matrix:
         toolset: [ clang-msvc-14.3 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1
@@ -384,8 +375,8 @@ jobs:
       matrix:
         qemu_arch: [ aarch64, s390x, ppc64le ]
     steps:
-      - uses: actions/checkout@v2.1.0
-      - uses: uraimo/run-on-arch-action@v2.0.5
+      - uses: actions/checkout@v3
+      - uses: uraimo/run-on-arch-action@v2
         name: Run commands
         id: runcmd
         with:
@@ -420,8 +411,8 @@ jobs:
       matrix:
         qemu_arch: [ aarch64, ppc64le ]
     steps:
-      - uses: actions/checkout@v2.1.0
-      - uses: uraimo/run-on-arch-action@v2.0.5
+      - uses: actions/checkout@v3
+      - uses: uraimo/run-on-arch-action@v2
         name: Run commands
         id: runcmd
         with:
@@ -457,7 +448,7 @@ jobs:
       matrix:
         compiler: [ emcc ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1
@@ -534,7 +525,7 @@ jobs:
       matrix:
         std: [ 11, 14, 17 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: '0'
       - uses: mstachniuk/ci-skip@v1

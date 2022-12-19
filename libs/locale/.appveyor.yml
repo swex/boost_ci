@@ -36,8 +36,6 @@ environment:
     B2_LINK: shared,static
     # B2_THREADING: threading=multi,single
     B2_VARIANT: release
-    B2_FLAGS: testing.execute=off
-    B2_DEFINES: BOOST_LOCALE_DISABLE_DEPRECATED_03_WARNING
 
   matrix:
     - FLAVOR: Visual Studio 2008, 2010, 2012
@@ -131,7 +129,11 @@ install:
 
 build: off
 
-test_script: ci\build.bat
+test_script:
+  - set B2_TARGETS=libs/locale/test//show_config --verbose-test
+  - ci\build.bat
+  - set B2_TARGETS=libs/locale/test
+  - ci\build.bat
 
 for:
   # CodeCov coverage build
