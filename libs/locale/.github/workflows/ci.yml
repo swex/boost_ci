@@ -284,20 +284,20 @@ jobs:
         if: matrix.coverage
         run: ci/github/codecov.sh "setup"
 
-      - name: Run tests with iconv
-        if: '!matrix.coverity'
-        run: ci/build.sh
-        env: {B2_FLAGS: -a boost.locale.icu=off boost.locale.iconv=on}
-      - name: Run tests with ICU
-        if: '!matrix.coverity'
-        run: ci/build.sh
-        env: {B2_FLAGS: -a boost.locale.icu=on  boost.locale.iconv=off}
-      - name: Run tests with ICU/iconv
+      - name: Run tests
         if: '!matrix.coverity'
         run: |
           B2_TARGETS="libs/$SELF/test//show_config --verbose-test" ci/build.sh
           ci/build.sh
-        env: {B2_FLAGS: -a boost.locale.icu=on  boost.locale.iconv=on}
+
+      - name: Run tests with iconv only
+        if: '!matrix.coverity'
+        run: ci/build.sh
+        env: {B2_FLAGS: -a boost.locale.icu=off boost.locale.iconv=on}
+      - name: Run tests with ICU only
+        if: '!matrix.coverity'
+        run: ci/build.sh
+        env: {B2_FLAGS: -a boost.locale.icu=on  boost.locale.iconv=off}
 
       - name: Upload coverage
         if: matrix.coverage
@@ -324,6 +324,7 @@ jobs:
           - { toolset: gcc,       cxxstd: '03,11,14,17,2a', addrmd: '64',    os: windows-2019 }
 
     runs-on: ${{matrix.os}}
+    env: {ICU_VERSION: '71.1'}
 
     steps:
       - uses: actions/checkout@v3
@@ -343,13 +344,21 @@ jobs:
       - name: Setup Boost
         run: ci\github\install.bat
 
-      - name: Get ICU
+      - name: Get cached ICU
+        uses: actions/cache@v3
+        id: cache-icu
+        with:
+          path: ICU
+          key: ICU-${{env.ICU_VERSION}}
+
+      - name: Download ICU
+        if: steps.cache-icu.outputs.cache-hit != 'true'
         shell: pwsh
-        run: |
-            $ICU_ROOT = "$($pwd.Path)\ICU"
-            cmake -DICU_ROOT="$ICU_ROOT" -DICU_VERSION="71.1" -P tools/download_icu.cmake
-            Add-Content $Env:BOOST_ROOT/project-config.jam "path-constant ICU_PATH : `"$ICU_ROOT`" ;"
-            Get-Content $Env:BOOST_ROOT/project-config.jam
+        run: cmake -DICU_ROOT="$($pwd.Path)\ICU" -DICU_VERSION="$Env:ICU_VERSION" -P tools/download_icu.cmake
+
+      - name: Setup ICU
+        shell: pwsh
+        run: 'Add-Content $Env:BOOST_ROOT/project-config.jam "path-constant ICU_PATH : `"$($pwd.Path)\ICU`" ;"'
 
       - name: Run tests
         if: '!matrix.coverage'
@@ -483,7 +492,7 @@ jobs:
         run: |
             cd "$BOOST_ROOT"
             mkdir __build_cmake_test__ && cd __build_cmake_test__
-            cmake -G "${{matrix.generator}}" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=${{matrix.build_shared}} -DBUILD_TESTING=ON -DBoost_VERBOSE=ON -DCMAKE_IGNORE_PREFIX_PATH="/c/Strawberry/c" ..
+            cmake -G "${{matrix.generator}}" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=${{matrix.build_shared}} -DBUILD_TESTING=ON -DBoost_VERBOSE=ON -DBOOST_LOCALE_WERROR=ON ..
             cmake --build . --target tests --config ${{matrix.build_type}} -j$B2_JOBS
             ctest --output-on-failure --build-config ${{matrix.build_type}}
 
@@ -498,7 +507,7 @@ jobs:
             if [[ "$RUNNER_OS" == "Windows" ]] && [[ "${{matrix.build_shared}}" == "ON" ]]; then
                 extra_args="-DCMAKE_RUNTIME_OUTPUT_DIRECTORY='$(pwd)/bin'"
             fi
-            cmake -G "${{matrix.generator}}" -DBOOST_CI_INSTALL_TEST=OFF -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_SHARED_LIBS=${{matrix.build_shared}} $extra_args -DCMAKE_IGNORE_PREFIX_PATH="/c/Strawberry/c" ..
+            cmake -G "${{matrix.generator}}" -DBOOST_CI_INSTALL_TEST=OFF -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBUILD_SHARED_LIBS=${{matrix.build_shared}} $extra_args ..
             cmake --build . --config ${{matrix.build_type}} -j$B2_JOBS
             ctest --output-on-failure --build-config ${{matrix.build_type}}
 
@@ -508,7 +517,7 @@ jobs:
             echo "BCM_INSTALL_PATH=$BCM_INSTALL_PATH" >> $GITHUB_ENV
             cd "$BOOST_ROOT"
             mkdir __build_cmake_install_test__ && cd __build_cmake_install_test__
-            cmake -G "${{matrix.generator}}" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=${{matrix.build_shared}} -DCMAKE_INSTALL_PREFIX="$BCM_INSTALL_PATH" -DBoost_VERBOSE=ON -DBoost_DEBUG=ON -DCMAKE_IGNORE_PREFIX_PATH="/c/Strawberry/c" ..
+            cmake -G "${{matrix.generator}}" -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DBOOST_INCLUDE_LIBRARIES=$SELF -DBUILD_SHARED_LIBS=${{matrix.build_shared}} -DCMAKE_INSTALL_PREFIX="$BCM_INSTALL_PATH" -DBoost_VERBOSE=ON -DBoost_DEBUG=ON ..
             cmake --build . --target install --config ${{matrix.build_type}} -j$B2_JOBS
       - name: Run CMake install tests
         run: |

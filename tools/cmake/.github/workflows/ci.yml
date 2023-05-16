@@ -138,6 +138,32 @@ jobs:
             layout: versioned
             shared: ON
             test_install: ON
+          - os: ubuntu-latest
+            include: mysql
+            testing: ON
+            install: libssl-dev
+          - os: ubuntu-latest
+            include: mysql
+            test_install: ON
+            install: libssl-dev
+          - os: ubuntu-latest
+            include: bind
+            testing: ON
+          - os: ubuntu-latest
+            include: bind
+            test_install: ON
+          - os: ubuntu-latest
+            include: endian
+            testing: ON
+          - os: ubuntu-latest
+            include: endian
+            test_install: ON
+          - os: ubuntu-latest
+            include: system
+            testing: ON
+          - os: ubuntu-latest
+            include: system
+            test_install: ON
 
     runs-on: ${{matrix.os}}
 
@@ -244,6 +270,24 @@ jobs:
             include: iostreams
             shared: ON
             test_install: ON
+          - os: windows-2019
+            include: bind
+            testing: ON
+          - os: windows-2019
+            include: bind
+            test_install: ON
+          - os: windows-2019
+            include: endian
+            testing: ON
+          - os: windows-2019
+            include: endian
+            test_install: ON
+          - os: windows-2019
+            include: system
+            testing: ON
+          - os: windows-2019
+            include: system
+            test_install: ON
 
     runs-on: ${{matrix.os}}
 
@@ -273,7 +317,7 @@ jobs:
         run: |
           cd ../boost-root
           mkdir __build__ && cd __build__
-          cmake -DBoost_VERBOSE=${{matrix.verbose}} -DBUILD_TESTING=${{matrix.testing}} -DBOOST_INCLUDE_LIBRARIES=${{matrix.include}} -DBOOST_EXCLUDE_LIBRARIES=${{matrix.exclude}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -DBOOST_ENABLE_MPI=${{matrix.mpi}} -DBOOST_ENABLE_PYTHON=${{matrix.python}} ..
+          cmake -DBoost_VERBOSE=${{matrix.verbose}} -DBUILD_TESTING=${{matrix.testing}} -DBOOST_INCLUDE_LIBRARIES=${{matrix.include}} -DBOOST_EXCLUDE_LIBRARIES=${{matrix.exclude}} -DBUILD_SHARED_LIBS=${{matrix.shared}} -DBOOST_ENABLE_MPI=${{matrix.mpi}} -DBOOST_ENABLE_PYTHON=${{matrix.python}} -DCMAKE_IGNORE_PREFIX_PATH="C:/Strawberry/c" ..
 
       - name: Build Boost (Debug)
         run: cmake --build ../boost-root/__build__ --config Debug
@@ -383,6 +427,10 @@ jobs:
             shared: OFF
           - os: macos-11
             shared: ON
+          - os: macos-12
+            shared: OFF
+          - os: macos-12
+            shared: ON
 
     runs-on: ${{matrix.os}}
 
@@ -452,7 +500,10 @@ jobs:
           - os: ubuntu-22.04
             include: timer
             shared: ON
-          - os: macos-latest
+          - os: macos-11
+            include: timer
+            shared: ON
+          - os: macos-12
             include: timer
             shared: ON
 
