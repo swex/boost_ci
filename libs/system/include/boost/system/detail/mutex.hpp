@@ -31,7 +31,7 @@ struct mutex
 } // namespace system
 } // namespace boost
 
-#elif defined(BOOST_MSSTL_VERSION) && BOOST_MSSTL_VERSION >= 140
+#elif defined(BOOST_MSSTL_VERSION) && BOOST_MSSTL_VERSION >= 140 && !defined(_USING_V110_SDK71_)
 
 // Under the MS STL, std::mutex::mutex() is not constexpr, as is
 // required by the standard, which leads to initialization order
